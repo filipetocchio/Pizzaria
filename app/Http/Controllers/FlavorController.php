@@ -3,127 +3,129 @@
 namespace App\Http\Controllers;
 
 use App\Http\Enums\TamanhoEnum;
+use App\Http\Requests\FlavorCreatRequest;
 use App\Models\Flavor;
-use App\Http\Requests\{
-    FlavorCreatRequest
-};
-use Illuminate\Http\Request;
+use App\Services\Contracts\IServicoSabor;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class FlavorController
  *
  * @package App\Http\Controllers
- * @author Vinícius Siqueira
- * @link https://github.com/ViniciusSCS
- * @date 2024-10-01 15:52:04
- * @copyright UniEVANGÉLICA
+ * @author ...
  */
 class FlavorController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        $flavors = Flavor::select('id', 'sabor', 'preco', 'tamanho')
-            ->paginate('10');
+    protected $servicoSabor;
 
-        return [
-            'status' => 200,
-            'message' => 'Sabores encontrados!!',
-            'sabores' => $flavors
-        ];
+    public function __construct(IServicoSabor $servicoSabor)
+    {
+        $this->servicoSabor = $servicoSabor;
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Exibir a lista de sabores.
      */
-    public function store(FlavorCreatRequest $request)
+    public function index(): JsonResponse
     {
-        $data = $request->all();
+        $sabores = $this->servicoSabor->listarTodosSabores();
 
-        $flavor = Flavor::create([
-            'sabor' => $data['sabor'],
-            'preco' => $data['preco'],
-            'tamanho' => TamanhoEnum::from($data['tamanho']),
-        ]);
-
-        return [
+        return response()->json([
             'status' => 200,
-            'message' => 'Sabor cadastrado com sucesso!!',
-            'sabor' => $flavor
-        ];
+            'mensagem' => 'Sabores encontrados!',
+            'sabores' => $sabores
+        ], 200);
     }
 
     /**
-     * Display the specified resource.
+     * Armazenar um novo sabor.
      */
-    public function show(string $id)
+    public function store(FlavorCreatRequest $request): JsonResponse
     {
-        $flavor = Flavor::find($id);
+        $dados = $request->validated();
 
-        if(!$flavor){
-            return [
+        // Se necessário, converter 'tamanho' para o enum
+        $dados['tamanho'] = TamanhoEnum::from($dados['tamanho']);
+
+        $sabor = $this->servicoSabor->registrarSabor($dados);
+
+        return response()->json([
+            'status' => 201,
+            'mensagem' => 'Sabor cadastrado com sucesso!',
+            'sabor' => $sabor
+        ], 201);
+    }
+
+    /**
+     * Exibir um sabor específico.
+     */
+    public function show(string $id): JsonResponse
+    {
+        try {
+            $sabor = $this->servicoSabor->obterSaborPorId($id);
+
+            return response()->json([
+                'status' => 200,
+                'mensagem' => 'Sabor encontrado com sucesso!',
+                'sabor' => $sabor
+            ], 200);
+        } catch (ValidationException $e) {
+            return response()->json([
                 'status' => 404,
-                'message' => 'Sabor não encontrado! Que triste!',
-                'user' => $flavor
-            ];
+                'mensagem' => 'Sabor não encontrado!',
+                'sabor' => null
+            ], 404);
+        }
+    }
+
+    /**
+     * Atualizar um sabor específico.
+     */
+    public function update(Request $request, string $id): JsonResponse
+    {
+        $dados = $request->all();
+
+        // Se 'tamanho' estiver presente, converter para o enum
+        if (isset($dados['tamanho'])) {
+            $dados['tamanho'] = TamanhoEnum::from($dados['tamanho']);
         }
 
-        return [
-            'status' => 200,
-            'message' => 'Sabor encontrado com sucesso!!',
-            'user' => $flavor
-        ];
+        try {
+            $sabor = $this->servicoSabor->modificarSabor($id, $dados);
+
+            return response()->json([
+                'status' => 200,
+                'mensagem' => 'Sabor atualizado com sucesso!',
+                'sabor' => $sabor
+            ], 200);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'status' => 404,
+                'mensagem' => 'Sabor não encontrado!',
+                'sabor' => null
+            ], 404);
+        }
     }
 
     /**
-     * Update the specified resource in storage.
+     * Remover um sabor específico.
      */
-    public function update(Request $request, string $id)
+    public function destroy(string $id): JsonResponse
     {
-        $data = $request->all();
+        try {
+            $this->servicoSabor->deletarSabor($id);
 
-        $flavor = Flavor::find($id);
-
-        if(!$flavor){
-            return [
+            return response()->json([
+                'status' => 200,
+                'mensagem' => 'Sabor deletado com sucesso!'
+            ], 200);
+        } catch (ValidationException $e) {
+            return response()->json([
                 'status' => 404,
-                'message' => 'Sabor não encontrado! Que triste!',
-                'user' => $flavor
-            ];
+                'mensagem' => 'Sabor não encontrado!',
+                'sabor' => null
+            ], 404);
         }
-
-        $flavor->update($data);
-
-        return [
-            'status' => 200,
-            'message' => 'Sabor atualizado com sucesso!!',
-            'user' => $flavor
-        ];
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        $flavor = Flavor::find($id);
-
-        if(!$flavor){
-            return [
-                'status' => 404,
-                'message' => 'Sabor não encontrado! Que triste!',
-                'user' => $flavor
-            ];
-        }
-
-        $flavor->delete($id);
-
-        return [
-            'status' => 200,
-            'message' => 'Sabor deletado com sucesso!!'
-        ];
-
     }
 }

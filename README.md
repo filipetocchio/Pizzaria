@@ -1,66 +1,86 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Projeto Laravel com Arquitetura SOLID - Filipe Mota Tocchio Rodrigues
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Este projeto Laravel foi desenvolvido com uma arquitetura que segue os **princípios SOLID** com o objetivo de melhorar a robustez, a manutenibilidade e a simplicidade do código. Abaixo, segue um resumo das implementações e práticas aplicadas.
 
-## About Laravel
+## Sumário
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- [Princípios SOLID Implementados](#princípios-solid-implementados)
+- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Implementação Técnica](#implementação-técnica)
+- [Vantagens](#vantagens)
+- [Considerações Finais](#considerações-finais)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Princípios SOLID Implementados
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+1. **Single Responsibility Principle (SRP):**  
+   Cada classe tem uma responsabilidade única. Controladores lidam exclusivamente com requisições HTTP, os serviços centralizam a lógica de negócios, e os repositórios tratam do acesso a dados.
 
-## Learning Laravel
+2. **Open/Closed Principle (OCP):**  
+   As classes foram construídas para estarem abertas à extensão, mas fechadas para modificações diretas. A implementação das interfaces e a injeção de dependências facilitam a adição de funcionalidades sem comprometer o código existente.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+3. **Liskov Substitution Principle (LSP):**  
+   As subclasses substituem suas superclasses sem comprometer o comportamento do sistema. O uso de interfaces garante que as substituições respeitem a consistência.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+4. **Interface Segregation Principle (ISP):**  
+   Interfaces específicas foram criadas para atender a cada necessidade, evitando interfaces genéricas e amplas, trazendo flexibilidade e clareza.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+5. **Dependency Inversion Principle (DIP):**  
+   Com foco no desacoplamento, o projeto depende de abstrações (interfaces) ao invés de implementações concretas.
 
-## Laravel Sponsors
+## Estrutura do Projeto
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+A estrutura da pasta `app` foi reorganizada para incluir camadas dedicadas para Serviços e Repositórios, além das interfaces necessárias. As principais pastas incluem:
 
-### Premium Partners
+- **Http/**
+  - Controllers
+  - Enums
+  - Requests
+- **Models/**
+- **Providers/**
+- **Services/**
+  - Contracts
+- **Repositories/**
+  - Contracts
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## Implementação Técnica
 
-## Contributing
+### 1. Organização de Pastas
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Foram adicionadas novas pastas para uma divisão clara de responsabilidades:
 
-## Code of Conduct
+- `Services/Contracts/`: Contém interfaces de serviços.
+- `Repositories/Contracts/`: Armazena as interfaces dos repositórios.
+- `Services/`: Implementações dos serviços com a lógica de negócios.
+- `Repositories/`: Implementações dos repositórios, centralizando operações de banco de dados.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 2. Definição de Interfaces
 
-## Security Vulnerabilities
+Interfaces definem os contratos entre camadas, assegurando que cada serviço e repositório mantenha uma lista específica de operações a serem executadas.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 3. Repositórios para Acesso a Dados
 
-## License
+Repositórios centralizam as operações de acesso ao banco, promovendo a reutilização de código e facilitando a manutenção de interações com o banco de dados.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 4. Serviços para Lógica de Negócio
+
+Os serviços concentram a lógica de negócios, intermediando a comunicação entre controladores e repositórios.
+
+### 5. Injeção de Dependências
+
+O `AppServiceProvider` foi configurado para mapear interfaces às suas implementações, permitindo a injeção de dependências automática.
+
+### 6. Refatoração dos Controladores
+
+Os controladores foram ajustados para interagir apenas com os serviços, tornando-se responsáveis pelas respostas HTTP e delegando a lógica de negócio aos serviços.
+
+## Vantagens
+
+- **Facilidade de Manutenção:** A organização em camadas permite que mudanças em uma camada afetem minimamente as demais.
+- **Melhoria na Testabilidade:** Com serviços e repositórios isolados, os testes são mais simples e o código se torna mais confiável.
+- **Facilidade de Expansão:** A adição de funcionalidades não exige a modificação de classes existentes.
+- **Reutilização:** O código se torna mais modular e fácil de reutilizar em diferentes áreas do sistema.
+- **Desacoplamento:** O uso de injeção de dependências e interfaces reduz o acoplamento e facilita adaptações.
+
+## Considerações Finais
+
+Aplicar os princípios **SOLID** nesta arquitetura Laravel proporcionou uma estrutura de código mais organizada e sustentável. A separação clara entre **Controladores**, **Serviços** e **Repositórios** contribuiu para uma manutenção mais ágil e evoluções do sistema de forma facilitada.
